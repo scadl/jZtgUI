@@ -1,12 +1,20 @@
 <?php
 
+/*
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+*/
+
 // curl -H X-ZT1-Auth:-token- http://localhost:9993/controller/network
 // http://localhost/jZTRepeater/?apiRq=controller/network
+
+header('Content-Type: application/json');
 
 $ch = curl_init();
 
 $token = "";
-$fh = fopen('C:\ProgramData\ZeroTier\One\authtoken.secret','r');
+$fh = fopen('authtoken.secret','r');
 while ($line = fgets($fh)) {
 	$token .= $line;
 }
@@ -20,5 +28,4 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, [
 //curl_setopt($ch, CURLOPT_POSTFIELDS, "postvar1=value1&postvar2=value2&postvar3=value3");
 
 print(rtrim(curl_exec($ch),"1"));
-
 ?>

@@ -6,6 +6,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="img"/>
 	<classpathentry kind="lib" path="C:/Users/SCAD/.p2/pool/plugins/com.ibm.icu_75.1.0.jar" sourcepath="C:/Users/SCAD/.p2/pool/plugins/com.ibm.icu_75.1.0.jar"/>
 	<classpathentry kind="lib" path="C:/Users/SCAD/.p2/pool/plugins/jakarta.annotation-api_2.1.1.jar" sourcepath="C:/Users/SCAD/.p2/pool/plugins/jakarta.annotation-api_2.1.1.jar"/>
 	<classpathentry kind="lib" path="C:/Users/SCAD/.p2/pool/plugins/org.eclipse.core.commands_3.12.200.v20240627-1019.jar" sourcepath="C:/Users/SCAD/.p2/pool/plugins/org.eclipse.core.commands_3.12.200.v20240627-1019.jar"/>

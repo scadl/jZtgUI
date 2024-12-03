@@ -20,9 +20,12 @@
 	<classpathentry kind="lib" path="C:/Users/SCAD/.p2/pool/plugins/org.eclipse.text_3.14.100.v20240524-2010.jar" sourcepath="C:/Users/SCAD/.p2/pool/plugins/org.eclipse.text_3.14.100.v20240524-2010.jar"/>
 	<classpathentry kind="lib" path="C:/Users/SCAD/.p2/pool/plugins/org.eclipse.ui.forms_3.13.300.v20240424-0956.jar" sourcepath="C:/Users/SCAD/.p2/pool/plugins/org.eclipse.ui.forms_3.13.300.v20240424-0956.jar"/>
 	<classpathentry kind="lib" path="C:/Users/SCAD/.p2/pool/plugins/org.eclipse.ui.workbench_3.133.0.v20240818-1923.jar" sourcepath="C:/Users/SCAD/.p2/pool/plugins/org.eclipse.ui.workbench_3.133.0.v20240818-1923.jar"/>
-	<classpathentry kind="lib" path="D:/Works/DesktopApps/jZtgUI/libs/json-simple-1.1.1.jar"/>
-	<classpathentry kind="lib" path="D:/Works/DesktopApps/jZtgUI/libs/json-simple-1.1.1-javadoc.jar"/>
-	<classpathentry kind="lib" path="com.jgoodies.forms_1.9.0.v20240327-0800.jar"/>
-	<classpathentry kind="lib" path="com.jgoodies.common_1.8.1.v20240327-0800.jar"/>
+	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/jZTgUI/lib/json-simple-1.1.1-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/com.jgoodies.forms_1.9.0.v20240327-0800.jar"/>
+	<classpathentry kind="lib" path="lib/com.jgoodies.common_1.8.1.v20240327-0800.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

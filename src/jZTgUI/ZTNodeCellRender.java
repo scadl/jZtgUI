@@ -5,6 +5,7 @@ package jZTgUI;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
@@ -28,8 +29,11 @@ public class ZTNodeCellRender extends DefaultTreeCellRenderer {
 		ImageIcon imIcnG = new ImageIcon(MainWindow.class.getResource("/bullet_green.png"));			
 		ImageIcon imIcnY = new ImageIcon(MainWindow.class.getResource("/bullet_yellow.png"));
 		ImageIcon imIcnGy = new ImageIcon(MainWindow.class.getResource("/bullet_white.png"));
+		ImageIcon imIcnLc = new ImageIcon(MainWindow.class.getResource("/bullet_Pc.png"));
 		ImageIcon imIcnNet = new ImageIcon(MainWindow.class.getResource("/network_adapter.png"));
+		ImageIcon imIcnNetOff = new ImageIcon(MainWindow.class.getResource("/network_adapter_off.png"));
 		ImageIcon imIcnPC = new ImageIcon(MainWindow.class.getResource("/terminal.png"));
+		ImageIcon imIcnStar = new ImageIcon(MainWindow.class.getResource("/bullet_star.png"));
 	
 		/*
 		String node = (String) ((DefaultMutableTreeNode) value).getUserObject();
@@ -48,12 +52,25 @@ public class ZTNodeCellRender extends DefaultTreeCellRenderer {
 		if(tree.getModel().getRoot().equals(nodeN)) {
 			setIcon(imIcnPC);
 		} else if (nodeN.getChildCount()>0) {
-			setIcon(imIcnNet);
+			if(nodeN.getUserObject().toString().endsWith("[NAN]")) {
+				setIcon(imIcnNetOff);
+			} else {
+				setIcon(imIcnNet);
+			}
 		} else {
 			if(nodeN.getUserObject().toString().endsWith("[E]")) {
 				setIcon(imIcnGy);	
 			} else if(nodeN.getUserObject().toString().endsWith("[N]")) {
-				setIcon(imIcnR);	
+				setIcon(imIcnR);
+			} else if(nodeN.getUserObject().toString().endsWith("[C]")) {
+				setIcon(imIcnStar);
+				setToolTipText("Controller of this newtwork");
+				//setFont(new Font("Arial", Font.BOLD, 13));
+			} else if(nodeN.getUserObject().toString().endsWith("[L]")) {
+				setIcon(imIcnLc);
+				setForeground(new Color(0,0,255));
+			} else if(nodeN.getUserObject().toString().endsWith("[NAN]")) {
+				setIcon(imIcnNetOff);
 			} else {
 				setIcon(imIcnG);
 			}

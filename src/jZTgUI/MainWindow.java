@@ -48,20 +48,25 @@ import com.jgoodies.forms.layout.FormSpecs;
 
 import jZTgUI.jZTBridge;
 import javax.swing.JScrollPane;
+import javax.swing.JPanel;
 
 public class MainWindow {
 
 	private JFrame mainFrameWindow;
 	private JTextField textFieldToken;
+	private JTextField textFieldReptURL;
+	private JTextField textFieldControlerToken;
+	private JTextField textFieldZTCToken;
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		
+
 		// https://stackoverflow.com/questions/13139283/jframe-theme-and-appearance
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -75,7 +80,7 @@ public class MainWindow {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -96,24 +101,19 @@ public class MainWindow {
 		initialize();
 	}
 
-
-
 	/**
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		
+
 		jZTBridge jztBr = new jZTBridge();
-		
-		
-		
+
 		mainFrameWindow = new JFrame();
 		mainFrameWindow.setTitle("jZTgUI\r\n");
 		mainFrameWindow.setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
 		mainFrameWindow.setBounds(100, 100, 351, 450);
 		mainFrameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		mainFrameWindow.getContentPane()
-				.setLayout(new FormLayout(new ColumnSpec[] {
+		mainFrameWindow.getContentPane().setLayout(new FormLayout(new ColumnSpec[] {
 				FormSpecs.LABEL_COMPONENT_GAP_COLSPEC,
 				FormSpecs.RELATED_GAP_COLSPEC,
 				FormSpecs.GROWING_BUTTON_COLSPEC,
@@ -127,46 +127,93 @@ public class MainWindow {
 				FormSpecs.RELATED_GAP_ROWSPEC,
 				FormSpecs.DEFAULT_ROWSPEC,
 				FormSpecs.LABEL_COMPONENT_GAP_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
 				FormSpecs.LINE_GAP_ROWSPEC,}));
 
 		JLabel lblLabelNetworks = new JLabel("ZT Netwoks");
 		mainFrameWindow.getContentPane().add(lblLabelNetworks, "3, 2");
-		
+
 		JScrollPane scrollPane = new JScrollPane();
 		mainFrameWindow.getContentPane().add(scrollPane, "3, 4, fill, fill");
-		
-				JTree jTree = new JTree();
-				scrollPane.setViewportView(jTree);
-				jTree.setEditable(true);
 
-		Box horizontalBox = Box.createHorizontalBox();
-		mainFrameWindow.getContentPane().add(horizontalBox, "3, 6");
+		JTree jTree = new JTree();
+		scrollPane.setViewportView(jTree);
+		jTree.setEditable(true);
+
+		Box horizontalBox1 = Box.createHorizontalBox();
+		mainFrameWindow.getContentPane().add(horizontalBox1, "3, 6");
 
 		JLabel lblLabelToken = new JLabel("You Token");
-		horizontalBox.add(lblLabelToken);
+		horizontalBox1.add(lblLabelToken);
 		
+		JPanel panel = new JPanel();
+		horizontalBox1.add(panel);
+
 		textFieldToken = new JTextField();
-		horizontalBox.add(textFieldToken);
+		horizontalBox1.add(textFieldToken);
 		textFieldToken.setColumns(10);
 		textFieldToken.setText(jztBr.readTxtFile("C:\\ProgramData\\ZeroTier\\One\\authtoken.secret"));
 		
+		Box horizontalBox2 = Box.createHorizontalBox();
+		mainFrameWindow.getContentPane().add(horizontalBox2, "3, 9");
+		
+		JLabel lblLabelRept = new JLabel("jZT Repeater");
+		horizontalBox2.add(lblLabelRept);
+		
+		JPanel panel_1 = new JPanel();
+		horizontalBox2.add(panel_1);
+		
+		textFieldReptURL = new JTextField();
+		textFieldReptURL.setText("https://scadsdnd.net/jZTRep/");
+		textFieldReptURL.setColumns(10);
+		horizontalBox2.add(textFieldReptURL);
+		
+		Box horizontalBox3 = Box.createHorizontalBox();
+		mainFrameWindow.getContentPane().add(horizontalBox3, "3, 11");
+		
+		JLabel lblControllerToken = new JLabel("Controller Token");
+		horizontalBox3.add(lblControllerToken);
+		
+		JPanel panel_2 = new JPanel();
+		horizontalBox3.add(panel_2);
+		
+		textFieldControlerToken = new JTextField();
+		textFieldControlerToken.setColumns(10);
+		horizontalBox3.add(textFieldControlerToken);
+		
+		Box horizontalBox3_1 = Box.createHorizontalBox();
+		mainFrameWindow.getContentPane().add(horizontalBox3_1, "3, 13");
+		
+		JLabel lblZtcentralToken = new JLabel("ZTCentral Token");
+		horizontalBox3_1.add(lblZtcentralToken);
+		
+		JPanel panel_2_1 = new JPanel();
+		horizontalBox3_1.add(panel_2_1);
+		
+		textFieldZTCToken = new JTextField();
+		textFieldZTCToken.setColumns(10);
+		horizontalBox3_1.add(textFieldZTCToken);
+		
 				JButton btnReadButton = new JButton("Read");
-				horizontalBox.add(btnReadButton);
-				btnReadButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
+				mainFrameWindow.getContentPane().add(btnReadButton, "3, 15");
+		btnReadButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 
-						jztBr.setLocalToken(textFieldToken.getText());
-						jztBr.setOutJTree(jTree);
-						jztBr.readZTData();
+				jztBr.setLocalToken(textFieldToken.getText());
+				jztBr.setOutJTree(jTree);
+				jztBr.readZTData();
 
-					}
-				});
+			}
+		});
 		btnReadButton.doClick();
 
 	}
-	
 
 }
-
-
-

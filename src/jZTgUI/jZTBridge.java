@@ -26,39 +26,33 @@ import org.json.simple.parser.ParseException;
 /**
  * 
  */
+
 public class jZTBridge {
 
-	private String lToken = "";
-	private JTree outJTree = null;
+	public jZTTokens allTokens;
+	public JTree outJTree = null;
 
 	public jZTBridge() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public void setLocalToken(String token) {
-		lToken = token;
-	}
-
-	public void setOutJTree(JTree jTrCont) {
-		outJTree = jTrCont;
-	}
-
-	public String ztAPICurl(String reqAPI, Integer typeToken) {
+	public String ztAPICurl(String reqAPI, tokenType typeToken) {
 
 		try {
 
-			String ctrToken = "";
-			String ztToken = "";
-			
 			String req = "";
-			if (typeToken == 1) {
-				req = "curl -H X-ZT1-Auth:" + lToken + " " + reqAPI;
-			} else if (typeToken == 2) {
-				req = "curl " + reqAPI + "&token="+ctrToken;
-			} else if (typeToken == 3) {
-				req = "curl -X GET -H \"Authorization: token "+ztToken+"\" -L " + reqAPI;
+			switch (typeToken) {
+			case localToken:
+				req = "curl -H X-ZT1-Auth:" + allTokens.localToken + " " + reqAPI;
+				break;
+			case controlerToken:
+				req = "curl " + reqAPI + "&token=" + allTokens.controllerToken;
+				break;
+			case ztcentralToken:
+				req = "curl -X GET -H \"Authorization: token " + allTokens.ztCentralToken + "\" -L " + reqAPI;
+				break;
 			}
-			System.out.println(reqAPI);
+			System.out.println(req);
 
 			// https://www.baeldung.com/java-curl
 			// https://stackoverflow.com/questions/2586975/how-to-use-curl-in-java
@@ -104,7 +98,7 @@ public class jZTBridge {
 	}
 
 	private void getNodesByID(String nodeID, String apiURL, DefaultMutableTreeNode nodeNetwork, String ContrID,
-			String LocalID, String respNetList) {
+			String LocalID, String respNetList, tokenType typeToken) {
 
 		String req;
 
@@ -120,10 +114,10 @@ public class jZTBridge {
 				System.out.println(eNt.getKey());
 
 				req = apiURL + "controller/network/" + nodeID + "/member/" + eNt.getKey();
-				JSONObject jNodeAsMemb = (JSONObject) new JSONParser().parse(ztAPICurl(req, 2));
+				JSONObject jNodeAsMemb = (JSONObject) new JSONParser().parse(ztAPICurl(req, typeToken));
 
 				req = apiURL + "peer/" + eNt.getKey();
-				String respJNodeProps = ztAPICurl(req, 2);
+				String respJNodeProps = ztAPICurl(req, typeToken);
 				Boolean activeNode = false;
 				String crIP = "NA.NA.NA.NA";
 				if (respJNodeProps.length() > 2) {
@@ -133,16 +127,15 @@ public class jZTBridge {
 						JSONObject jNodePeerProps = (JSONObject) jNodePropArr.get(0);
 						activeNode = (Boolean) jNodePeerProps.get("active");
 					}
-					
+
 					JSONArray jNIPs = (JSONArray) jNodeAsMemb.get("ipAssignments");
 					if (jNIPs.size() > 0) {
 						crIP = (String) jNIPs.get(0);
-					} 
+					}
 				} else {
-					
+
 				}
-				
-				
+
 				String authSt = "";
 				if (ContrID.startsWith(eNt.getKey())) {
 					authSt = "[C]";
@@ -160,8 +153,6 @@ public class jZTBridge {
 				DefaultMutableTreeNode nodeMember = new DefaultMutableTreeNode(
 						crIP + " (" + eNt.getKey() + ") " + authSt);
 				nodeNetwork.add(nodeMember);
-
-				
 
 				// DefaultMutableTreeNode nodeMember = new DefaultMutableTreeNode( crIP + " (" +
 				// jONodeAdv.get("name") + ") "+authSt);
@@ -182,13 +173,13 @@ public class jZTBridge {
 			JSONArray jAr;
 			String req, netIP, Local_ID, Contr_ID;
 			String localApiURL = "http://localhost:9993/";
-			String jZTRepeaterURL = "https://scadsdnd.net/jZTRep/" + "?apiRq=";
+			String jZTRepeaterURL = allTokens.controllerApi + "?apiRq=";
 			String ZTCentralAPI = "https://api.zerotier.com/api/v1/";
 
 			// https://www.geeksforgeeks.org/parse-json-java/
 
-			req = localApiURL+"status";
-			jo = (JSONObject) new JSONParser().parse(ztAPICurl(req, 1));
+			req = localApiURL + "status";
+			jo = (JSONObject) new JSONParser().parse(ztAPICurl(req, tokenType.localToken));
 
 			// https://www.codejava.net/java-se/swing/jtree-basic-tutorial-and-examples
 			// https://stackoverflow.com/questions/7928839/adding-and-removing-nodes-from-a-jtree
@@ -198,68 +189,118 @@ public class jZTBridge {
 			System.out.println("Is online " + jo.get("online"));
 
 			req = jZTRepeaterURL + "status";
-			JSONObject joR = (JSONObject) new JSONParser().parse(ztAPICurl(req, 1));
-			Contr_ID = (String) joR.get("address");
-			System.out.println("Controller ID: " + Contr_ID);
+			String statusResp = ztAPICurl(req, tokenType.localToken);
+			if (statusResp.length() > 2) {
+				JSONObject joR = (JSONObject) new JSONParser().parse(statusResp);
+				Contr_ID = (String) joR.get("address");
+				System.out.println("Controller ID: " + Contr_ID);
 
-			// https://docs.zerotier.com/api/service/ref-v1/#tag/Joined-Networks
-			req = localApiURL+"network";
-			jAr = (JSONArray) new JSONParser().parse(ztAPICurl(req, 1));
+				// https://docs.zerotier.com/api/service/ref-v1/#tag/Joined-Networks
+				req = localApiURL + "network";
+				jAr = (JSONArray) new JSONParser().parse(ztAPICurl(req, tokenType.localToken));
 
-			for (int i = 0; i < jAr.size(); i++) {
+				for (int i = 0; i < jAr.size(); i++) {
 
-				jo = (JSONObject) jAr.get(i);
-				JSONArray jArrAd = (JSONArray) jo.get("assignedAddresses");
-				try {
-					netIP = (String) jArrAd.get(0);
-				} catch (Exception exception) {
-					netIP = "(No IP Assigned)[NAN]";
-					jo.replace("name", netIP);
+					jo = (JSONObject) jAr.get(i);
+					JSONArray jArrAd = (JSONArray) jo.get("assignedAddresses");
+					try {
+						netIP = (String) jArrAd.get(0);
+					} catch (Exception exception) {
+						netIP = "(No IP Assigned)[NAN]";
+						jo.replace("name", netIP);
+					}
+					DefaultMutableTreeNode nodeNetwork = new DefaultMutableTreeNode(jo.get("name"));
+					System.out.println("This NET IP: " + netIP);
+
+					// https://docs.zerotier.com/controller
+
+					// req = jZTRepeaterURL+"controller/network";
+					// ztAPICurl(req, false);
+
+					String respNets;
+
+					// Try LOCAL Controller
+					req = localApiURL + "controller/network/" + jo.get("id") + "/member";
+					respNets = ztAPICurl(req, tokenType.localToken);
+					if (respNets.length() > 0) {
+						getNodesByID((String) jo.get("id"), localApiURL, nodeNetwork, Contr_ID, Local_ID, respNets,
+								tokenType.localToken);
+					}
+					// Try Remote Controller
+					req = jZTRepeaterURL + "controller/network/" + jo.get("id") + "/member";
+					respNets = ztAPICurl(req, tokenType.controlerToken);
+					if (respNets.length() > 0) {
+						getNodesByID((String) jo.get("id"), jZTRepeaterURL, nodeNetwork, Contr_ID, Local_ID, respNets,
+								tokenType.controlerToken);
+					}
+					// Try ZTCentral Controller
+					// curl -X GET -H "Authorization: token xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" -L
+					// https://api.zerotier.com/api/v1/network/565799d8f616c30f/member
+					req = ZTCentralAPI + "network/" + jo.get("id") + "/member";
+					respNets = ztAPICurl(req, tokenType.ztcentralToken);
+					Boolean canParse = true;
+					try {
+						new JSONParser().parse(respNets);
+					} catch (ParseException eztc) {
+						// TODO: handle exception
+						//eztc.printStackTrace();
+						System.out.print("Malformed ZTCenral resonse got");
+						canParse = false;
+					} 
+					if (respNets.length() > 2 && canParse) {
+						// getNodesByID((String) jo.get("id"), jZTRepeaterURL, nodeNetwork, Contr_ID, Local_ID, respNets);
+						
+						JSONArray jArrZtc = (JSONArray) new JSONParser().parse(respNets);
+						for(int j=0; j<jArrZtc.size(); j++) {
+							
+							Boolean activeNode = true;
+							
+							
+							JSONObject jZTCNode = (JSONObject) jArrZtc.get(j);
+							JSONObject jZTCConf = (JSONObject) jZTCNode.get("config");
+							JSONArray jZTCIps = (JSONArray) jZTCConf.get("ipAssignments");
+							
+							long lastTime = (System.currentTimeMillis() - (long) jZTCNode.get("lastSeen"))/60000;							
+							
+							String authSt = "";
+							
+								if (Local_ID.startsWith((String) jZTCNode.get("nodeId"))) {
+									authSt = "[L]";
+								} else if ((Boolean) jZTCConf.get("authorized")) {
+									if (lastTime == 0) {									
+										authSt = "[A]";
+									} else {										
+										authSt = "[N]";
+									}
+									
+								} else {
+									authSt = "[E]";
+								}
+							DefaultMutableTreeNode nodeMember = new DefaultMutableTreeNode(
+									jZTCIps.get(0) + " (" + jZTCNode.get("nodeId") + ") '"+jZTCNode.get("name")+"' " + authSt);
+							nodeNetwork.add(nodeMember);
+							
+							System.out.println("Node "+j+" time: " + ((System.currentTimeMillis() - (long) jZTCNode.get("lastSeen"))/60000));
+						}
+						
+						
+					}
+					// System.out.println(respNets.length());
+
+					nr.add(nodeNetwork);
+
+					// jo.get("id")
 				}
-				DefaultMutableTreeNode nodeNetwork = new DefaultMutableTreeNode(jo.get("name"));
-				System.out.println("This NET IP: " + netIP);
 
-				// https://docs.zerotier.com/controller
+				DefaultTreeModel tm = (DefaultTreeModel) outJTree.getModel();
+				DefaultMutableTreeNode rt = (DefaultMutableTreeNode) tm.getRoot();
+				tm.setRoot(nr);
 
-				// req = jZTRepeaterURL+"controller/network";
-				// ztAPICurl(req, false);
+				ZTNodeCellRender ztcr = new ZTNodeCellRender();
+				outJTree.setCellRenderer(ztcr);
 
-				String respNets;
-				
-				// Try LOCAL Controller
-				req = localApiURL + "controller/network/" + jo.get("id") + "/member";
-				respNets = ztAPICurl(req, 1);
-				if (respNets.length() > 0) {	
-					getNodesByID((String) jo.get("id"), localApiURL, nodeNetwork, Contr_ID, Local_ID, respNets);
-				}
-				// Try Remote Controller
-				req = jZTRepeaterURL + "controller/network/" + jo.get("id") + "/member";
-				respNets = ztAPICurl(req, 2);
-				if (respNets.length() > 0) {					
-					getNodesByID((String) jo.get("id"), jZTRepeaterURL, nodeNetwork, Contr_ID, Local_ID, respNets);
-				} 
-				// Try ZTCentral Controller
-				// curl -X GET -H "Authorization: token xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" -L https://api.zerotier.com/api/v1/network/565799d8f616c30f/member
-				req = jZTRepeaterURL + "controller/network/" + jo.get("id") + "/member";
-				//respNets = ztAPICurl(req, false);
-				if (respNets.length() > 0) {					
-					//getNodesByID((String) jo.get("id"), jZTRepeaterURL, nodeNetwork, Contr_ID, Local_ID, respNets);
-				} 
-				// System.out.println(respNets.length());
-
-				nr.add(nodeNetwork);
-
-				// jo.get("id")
+				// tm.insertNodeInto(node1, rt, rt.getChildCount());
 			}
-
-			DefaultTreeModel tm = (DefaultTreeModel) outJTree.getModel();
-			DefaultMutableTreeNode rt = (DefaultMutableTreeNode) tm.getRoot();
-			tm.setRoot(nr);
-
-			ZTNodeCellRender ztcr = new ZTNodeCellRender();
-			outJTree.setCellRenderer(ztcr);
-
-			// tm.insertNodeInto(node1, rt, rt.getChildCount());
 
 		} catch (ParseException e1) {
 			// TODO Auto-generated catch block

@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -66,7 +67,7 @@ public class MainWindow {
 		// https://stackoverflow.com/questions/13139283/jframe-theme-and-appearance
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			
+
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -113,29 +114,16 @@ public class MainWindow {
 		mainFrameWindow.setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
 		mainFrameWindow.setBounds(100, 100, 351, 450);
 		mainFrameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		mainFrameWindow.getContentPane().setLayout(new FormLayout(new ColumnSpec[] {
-				FormSpecs.LABEL_COMPONENT_GAP_COLSPEC,
-				FormSpecs.RELATED_GAP_COLSPEC,
-				FormSpecs.GROWING_BUTTON_COLSPEC,
-				FormSpecs.RELATED_GAP_COLSPEC,
-				FormSpecs.LABEL_COMPONENT_GAP_COLSPEC,},
-			new RowSpec[] {
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("14px"),
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("301px:grow"),
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.LABEL_COMPONENT_GAP_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.LINE_GAP_ROWSPEC,}));
+		mainFrameWindow.getContentPane().setLayout(new FormLayout(
+				new ColumnSpec[] { FormSpecs.LABEL_COMPONENT_GAP_COLSPEC, FormSpecs.RELATED_GAP_COLSPEC,
+						FormSpecs.GROWING_BUTTON_COLSPEC, FormSpecs.RELATED_GAP_COLSPEC,
+						FormSpecs.LABEL_COMPONENT_GAP_COLSPEC, },
+				new RowSpec[] { FormSpecs.RELATED_GAP_ROWSPEC, RowSpec.decode("14px"), FormSpecs.RELATED_GAP_ROWSPEC,
+						RowSpec.decode("301px:grow"), FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
+						FormSpecs.LABEL_COMPONENT_GAP_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
+						FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC,
+						FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
+						FormSpecs.LINE_GAP_ROWSPEC, }));
 
 		JLabel lblLabelNetworks = new JLabel("ZT Netwoks");
 		mainFrameWindow.getContentPane().add(lblLabelNetworks, "3, 2");
@@ -144,6 +132,17 @@ public class MainWindow {
 		mainFrameWindow.getContentPane().add(scrollPane, "3, 4, fill, fill");
 
 		JTree jTree = new JTree();
+		jTree.setModel(new DefaultTreeModel(
+			new DefaultMutableTreeNode("-LocalPC-") {
+				{
+					DefaultMutableTreeNode node_1;
+					node_1 = new DefaultMutableTreeNode("-Network_1-");
+						node_1.add(new DefaultMutableTreeNode("-Node_1[PC]-"));
+						node_1.add(new DefaultMutableTreeNode("-Node_2[PC]-"));
+					add(node_1);
+				}
+			}
+		));
 		scrollPane.setViewportView(jTree);
 		jTree.setEditable(true);
 
@@ -152,7 +151,7 @@ public class MainWindow {
 
 		JLabel lblLabelToken = new JLabel("You Token");
 		horizontalBox1.add(lblLabelToken);
-		
+
 		JPanel panel = new JPanel();
 		horizontalBox1.add(panel);
 
@@ -160,54 +159,80 @@ public class MainWindow {
 		horizontalBox1.add(textFieldToken);
 		textFieldToken.setColumns(10);
 		textFieldToken.setText(jztBr.readTxtFile("C:\\ProgramData\\ZeroTier\\One\\authtoken.secret"));
-		
+
 		Box horizontalBox2 = Box.createHorizontalBox();
 		mainFrameWindow.getContentPane().add(horizontalBox2, "3, 9");
-		
+
 		JLabel lblLabelRept = new JLabel("jZT Repeater");
 		horizontalBox2.add(lblLabelRept);
-		
+
 		JPanel panel_1 = new JPanel();
 		horizontalBox2.add(panel_1);
-		
+
 		textFieldReptURL = new JTextField();
-		textFieldReptURL.setText("https://scadsdnd.net/jZTRep/");
+		textFieldReptURL.setText(jztBr.readTxtFile("controller.api"));
 		textFieldReptURL.setColumns(10);
 		horizontalBox2.add(textFieldReptURL);
-		
+
 		Box horizontalBox3 = Box.createHorizontalBox();
 		mainFrameWindow.getContentPane().add(horizontalBox3, "3, 11");
-		
+
 		JLabel lblControllerToken = new JLabel("Controller Token");
 		horizontalBox3.add(lblControllerToken);
-		
+
 		JPanel panel_2 = new JPanel();
 		horizontalBox3.add(panel_2);
-		
+
 		textFieldControlerToken = new JTextField();
 		textFieldControlerToken.setColumns(10);
+		textFieldControlerToken.setText(jztBr.readTxtFile("controller.token"));
 		horizontalBox3.add(textFieldControlerToken);
-		
+
 		Box horizontalBox3_1 = Box.createHorizontalBox();
 		mainFrameWindow.getContentPane().add(horizontalBox3_1, "3, 13");
-		
+
 		JLabel lblZtcentralToken = new JLabel("ZTCentral Token");
 		horizontalBox3_1.add(lblZtcentralToken);
-		
+
 		JPanel panel_2_1 = new JPanel();
 		horizontalBox3_1.add(panel_2_1);
-		
+
 		textFieldZTCToken = new JTextField();
 		textFieldZTCToken.setColumns(10);
+		textFieldZTCToken.setText(jztBr.readTxtFile("ztcentral.token"));
 		horizontalBox3_1.add(textFieldZTCToken);
-		
-				JButton btnReadButton = new JButton("Read");
-				mainFrameWindow.getContentPane().add(btnReadButton, "3, 15");
+
+		JButton btnReadButton = new JButton("Read");
+		mainFrameWindow.getContentPane().add(btnReadButton, "3, 15");
 		btnReadButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
-				jztBr.setLocalToken(textFieldToken.getText());
-				jztBr.setOutJTree(jTree);
+				
+				File f;
+				FileWriter fW;
+				String[] configFiles = {"controller.token","ztcentral.token","controller.api"};
+				String[] configVals = {textFieldControlerToken.getText(),textFieldZTCToken.getText(),textFieldReptURL.getText()};
+				try {
+					
+					for(int i=0; i< configFiles.length; i++) {
+						
+						f = new File(configFiles[i]);
+						f.createNewFile();
+						
+						fW = new FileWriter(configFiles[i]);
+						fW.write(configVals[i]);
+						fW.close();
+					}
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}				
+				
+				jztBr.allTokens = new jZTTokens();
+				jztBr.allTokens.localToken = textFieldToken.getText();
+				jztBr.allTokens.controllerToken = textFieldControlerToken.getText();
+				jztBr.allTokens.ztCentralToken = textFieldZTCToken.getText();
+				jztBr.allTokens.controllerApi = textFieldReptURL.getText();
+				jztBr.outJTree = jTree;
 				jztBr.readZTData();
 
 			}

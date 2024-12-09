@@ -35,6 +35,9 @@ public class ZTNodeCellRender extends DefaultTreeCellRenderer {
 		ImageIcon imIcnPC = new ImageIcon(MainWindow.class.getResource("/terminal.png"));
 		ImageIcon imIcnStar = new ImageIcon(MainWindow.class.getResource("/bullet_star.png"));
 	
+		String[] unfmtLbl = getText().split("\\|");
+		
+		
 		/*
 		String node = (String) ((DefaultMutableTreeNode) value).getUserObject();
 		if(leaf && node.endsWith("[NA]")) {
@@ -59,12 +62,11 @@ public class ZTNodeCellRender extends DefaultTreeCellRenderer {
 			}
 		} else {
 			if(nodeN.getUserObject().toString().endsWith("[E]")) {
-				setIcon(imIcnGy);	
+				setIcon(imIcnGy);
 			} else if(nodeN.getUserObject().toString().endsWith("[N]")) {
 				setIcon(imIcnR);
 			} else if(nodeN.getUserObject().toString().endsWith("[C]")) {
 				setIcon(imIcnStar);
-				setToolTipText("Controller of this newtwork");
 				//setFont(new Font("Arial", Font.BOLD, 13));
 			} else if(nodeN.getUserObject().toString().endsWith("[L]")) {
 				setIcon(imIcnLc);
@@ -74,6 +76,13 @@ public class ZTNodeCellRender extends DefaultTreeCellRenderer {
 			} else {
 				setIcon(imIcnG);
 			}
+		}
+		
+		try {
+		setText(unfmtLbl[0]);
+		setToolTipText(unfmtLbl[1]);
+		} catch (Exception e) {
+			e.getStackTrace();
 		}
 		
 		return this;

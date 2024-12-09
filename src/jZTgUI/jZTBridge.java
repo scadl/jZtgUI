@@ -189,7 +189,7 @@ public class jZTBridge {
 						authSt = "[E]";
 					}
 					DefaultMutableTreeNode nodeMember = new DefaultMutableTreeNode(
-							crIP + " (" + eNt.getKey() + ") " + authSt);
+							crIP + "|" + eNt.getKey() + "|" + authSt);
 					nodeNetwork.add(nodeMember);
 
 					// DefaultMutableTreeNode nodeMember = new DefaultMutableTreeNode( crIP + " (" +
@@ -211,12 +211,13 @@ public class jZTBridge {
 
 					Map.Entry<String, Integer> eNt = iTr1.next();
 					String peerID = eNt.getKey();
-					System.out.println(peerID);				
+					//System.out.println(peerID);				
 
 					String crIP = "NA.NA.NA.NA";
 					Boolean activeNode = checkNodeActive(jPeers, peerID);
 					Boolean authorized = false;
 					String authSt = "";
+					String nameNode = "";
 					
 					if (jNodeAsMemb.size() > 0) {
 						for(int j=0; j<jNodeAsMemb.size(); j++) {
@@ -227,6 +228,7 @@ public class jZTBridge {
 								if(ipAddr.size()>0) {
 									crIP = (String) ipAddr.get(0);
 								}
+								nameNode = (String) jPeerObj.get("name");
 							}
 						}
 					}
@@ -244,7 +246,8 @@ public class jZTBridge {
 					} else {
 						authSt = "[E]";
 					}
-					DefaultMutableTreeNode nodeMember = new DefaultMutableTreeNode(crIP + " (" + peerID + ") " + authSt);
+					DefaultMutableTreeNode nodeMember = new DefaultMutableTreeNode(
+							crIP + " (" + nameNode + ") |"  + peerID + "|" + authSt);
 					nodeNetwork.add(nodeMember);
 
 				}
@@ -274,12 +277,12 @@ public class jZTBridge {
 					} else {
 						authSt = "[E]";
 					}
-					DefaultMutableTreeNode nodeMember = new DefaultMutableTreeNode(jZTCIps.get(0) + " ("
-							+ jZTCNode.get("nodeId") + ") '" + jZTCNode.get("name") + "' " + authSt);
+					DefaultMutableTreeNode nodeMember = new DefaultMutableTreeNode(jZTCIps.get(0) +  
+							" (" + jZTCNode.get("name") + ") |" + jZTCNode.get("nodeId") + "|" + authSt);
 					nodeNetwork.add(nodeMember);
 
-					System.out.println("Node " + jZTCNode.get("nodeId") + " time: "
-							+ ((System.currentTimeMillis() - (long) jZTCNode.get("lastSeen")) / 60000));
+					//System.out.println("Node " + jZTCNode.get("nodeId") + " time: "
+					//		+ ((System.currentTimeMillis() - (long) jZTCNode.get("lastSeen")) / 60000));
 				}
 				break;
 			}
@@ -332,12 +335,13 @@ public class jZTBridge {
 					String marker = "";
 					try {
 						netIP = (String) jArrAd.get(0);
+						marker = "[NN]";
 					} catch (Exception exception) {
 						netIP = "<No IP Assigned>";
-						marker = " [NAN]";
+						marker = "[NAN]";
 						jo.replace("name", netIP);
 					}
-					DefaultMutableTreeNode nodeNetwork = new DefaultMutableTreeNode(jo.get("name") + "("+jo.get("id")+")"+marker);
+					DefaultMutableTreeNode nodeNetwork = new DefaultMutableTreeNode(jo.get("name") + "|"+jo.get("id")+"|"+marker);
 					System.out.println("This NET IP: " + netIP);
 
 					// https://docs.zerotier.com/controller

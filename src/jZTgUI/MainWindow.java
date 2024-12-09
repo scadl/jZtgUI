@@ -31,6 +31,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JSeparator;
 import javax.swing.JTree;
+import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.TreeModelListener;
@@ -43,6 +44,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.ActionEvent;
 import java.awt.Dialog.ModalExclusionType;
 import com.jgoodies.forms.layout.FormSpecs;
@@ -145,6 +147,17 @@ public class MainWindow {
 		));
 		scrollPane.setViewportView(jTree);
 		jTree.setEditable(true);
+		ToolTipManager.sharedInstance().registerComponent(jTree);
+		// https://docs.oracle.com/javase/tutorial/uiswing/components/tooltip.html
+		// https://docs.oracle.com/javase/7/docs/api/javax/swing/JTree.html#getToolTipText(java.awt.event.MouseEvent)
+		// https://stackoverflow.com/questions/517704/right-click-context-menu-for-java-jtree
+		
+		
+		MouseAdapter ma  = new MouseAdapter() {
+			
+		};
+		jTree.addMouseListener(ma);
+		
 
 		Box horizontalBox1 = Box.createHorizontalBox();
 		mainFrameWindow.getContentPane().add(horizontalBox1, "3, 6");

@@ -157,14 +157,22 @@ public class MainWindow {
 		ToolTipManager.sharedInstance().registerComponent(jTree);
 		
 		JPopupMenu popupMenu = new JPopupMenu();
-		addPopup(jTree, popupMenu);
+		//addPopup(jTree, popupMenu);
 		popupMenu.setLabel("");
 		
-		JMenuItem mntmNewMenuItem = new JMenuItem("New menu item");
+		JMenuItem mntmNewMenuItem = new JMenuItem("<NO ID>");
 		popupMenu.add(mntmNewMenuItem);
 		
-		JMenuItem mntmNewMenuItem_1 = new JMenuItem("New menu item");
+		JMenuItem mntmNewMenuItem_1 = new JMenuItem("Set Type");
 		popupMenu.add(mntmNewMenuItem_1);
+		
+		JMenuItem mntmNewMenuItem_1a = new JMenuItem("Controller");
+		JMenuItem mntmNewMenuItem_1b = new JMenuItem("ZT Central");
+		JMenuItem mntmNewMenuItem_1c = new JMenuItem("Local");
+		mntmNewMenuItem_1.add(mntmNewMenuItem_1a);
+		mntmNewMenuItem_1.add(mntmNewMenuItem_1b);
+		mntmNewMenuItem_1.add(mntmNewMenuItem_1c);
+		
 		jTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		// https://docs.oracle.com/javase/tutorial/uiswing/components/tooltip.html
 		// https://docs.oracle.com/javase/7/docs/api/javax/swing/JTree.html#getToolTipText(java.awt.event.MouseEvent)
@@ -181,7 +189,20 @@ public class MainWindow {
 					}
 					int row = jTree.getClosestRowForLocation(e.getX(), e.getY());
 					jTree.setSelectionRow(row);
-					System.out.println(node.getUserObject().toString());
+					String[] nodeInfo = node.getUserObject().toString().split("\\|");
+					try {
+						mntmNewMenuItem.setText("ID: "+nodeInfo[1]);
+						//JMenuItem nMI = new JMenuItem("ID:"+nodeInfo[1]);
+						//popupMenu.add(nMI);
+						popupMenu.show(e.getComponent(), e.getX(), e.getY());
+					} catch (Exception e2) {
+						// TODO: handle exception
+						//mntmNewMenuItem.setText("<NO ID>");
+						e2.printStackTrace();
+					}
+					
+					System.out.println(nodeInfo);
+					
 				}
 			}
 		};

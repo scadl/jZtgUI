@@ -398,6 +398,7 @@ public class jZTBridge {
 
 				ZTNodeCellRender ztcr = new ZTNodeCellRender();
 				outJTree.setCellRenderer(ztcr);
+				outJTree.setSelectionRow(0); // Required to make RMB clicks to work
 
 				// tm.insertNodeInto(node1, rt, rt.getChildCount());
 			}

@@ -31,6 +31,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JSeparator;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -39,6 +40,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -52,6 +54,11 @@ import com.jgoodies.forms.layout.FormSpecs;
 import jZTgUI.jZTBridge;
 import javax.swing.JScrollPane;
 import javax.swing.JPanel;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.event.TreeSelectionEvent;
+import java.awt.event.MouseEvent;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
 
 public class MainWindow {
 
@@ -148,13 +155,35 @@ public class MainWindow {
 		scrollPane.setViewportView(jTree);
 		jTree.setEditable(true);
 		ToolTipManager.sharedInstance().registerComponent(jTree);
+		
+		JPopupMenu popupMenu = new JPopupMenu();
+		addPopup(jTree, popupMenu);
+		popupMenu.setLabel("");
+		
+		JMenuItem mntmNewMenuItem = new JMenuItem("New menu item");
+		popupMenu.add(mntmNewMenuItem);
+		
+		JMenuItem mntmNewMenuItem_1 = new JMenuItem("New menu item");
+		popupMenu.add(mntmNewMenuItem_1);
+		jTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		// https://docs.oracle.com/javase/tutorial/uiswing/components/tooltip.html
 		// https://docs.oracle.com/javase/7/docs/api/javax/swing/JTree.html#getToolTipText(java.awt.event.MouseEvent)
 		// https://stackoverflow.com/questions/517704/right-click-context-menu-for-java-jtree
 		
 		
-		MouseAdapter ma  = new MouseAdapter() {
-			
+		MouseAdapter ma  = new MouseAdapter() {			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(SwingUtilities.isRightMouseButton(e)) {
+					DefaultMutableTreeNode node = (DefaultMutableTreeNode) jTree.getLastSelectedPathComponent();
+					if (node == null) {
+						return;
+					}
+					int row = jTree.getClosestRowForLocation(e.getX(), e.getY());
+					jTree.setSelectionRow(row);
+					System.out.println(node.getUserObject().toString());
+				}
+			}
 		};
 		jTree.addMouseListener(ma);
 		
@@ -254,4 +283,21 @@ public class MainWindow {
 
 	}
 
+	private static void addPopup(Component component, final JPopupMenu popup) {
+		component.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+			public void mouseReleased(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+			private void showMenu(MouseEvent e) {
+				popup.show(e.getComponent(), e.getX(), e.getY());
+			}
+		});
+	}
 }

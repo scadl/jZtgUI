@@ -1,6 +1,6 @@
 package jZTgUI;
 
-public enum tokenType {
+public enum tokenTypeEnum {
 	localToken,
 	controlerToken,
 	ztcentralToken

@@ -25,6 +25,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 
 import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JTextField;
 import java.awt.GridLayout;
 import javax.swing.BoxLayout;
@@ -58,6 +59,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import java.awt.event.MouseEvent;
 import javax.swing.JPopupMenu;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JMenuItem;
 
 public class MainWindow {
@@ -160,24 +162,35 @@ public class MainWindow {
 		//addPopup(jTree, popupMenu);
 		popupMenu.setLabel("");
 		
-		JMenuItem mntmNewMenuItem = new JMenuItem("<NO ID>");
-		popupMenu.add(mntmNewMenuItem);
+		JMenuItem mntmIDMenuItem = new JMenuItem("<NO ID>");
+		popupMenu.add(mntmIDMenuItem);
 		
-		JMenuItem mntmNewMenuItem_1 = new JMenuItem("Set Type");
-		popupMenu.add(mntmNewMenuItem_1);
+		JMenu mntmTypeMenu = new JMenu("Set Type");
+		popupMenu.add(mntmTypeMenu);
 		
-		JMenuItem mntmNewMenuItem_1a = new JMenuItem("Controller");
-		JMenuItem mntmNewMenuItem_1b = new JMenuItem("ZT Central");
-		JMenuItem mntmNewMenuItem_1c = new JMenuItem("Local");
-		mntmNewMenuItem_1.add(mntmNewMenuItem_1a);
-		mntmNewMenuItem_1.add(mntmNewMenuItem_1b);
-		mntmNewMenuItem_1.add(mntmNewMenuItem_1c);
+		JRadioButtonMenuItem[] mntmTypeItems = {
+				new JRadioButtonMenuItem("Controller"),
+				new JRadioButtonMenuItem("ZT Central"),
+				new JRadioButtonMenuItem("Local")
+		};
+		for(int i=0; i<mntmTypeItems.length; i++) {
+			mntmTypeMenu.add(mntmTypeItems[i]);
+			mntmTypeItems[i].addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					JRadioButtonMenuItem jrm = (JRadioButtonMenuItem) e.getSource();
+					for(int j=0; j<mntmTypeItems.length; j++) {
+						mntmTypeItems[j].setSelected(false);
+					}
+					jrm.setSelected(true);
+				}
+			});
+		}
 		
 		jTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		// https://docs.oracle.com/javase/tutorial/uiswing/components/tooltip.html
 		// https://docs.oracle.com/javase/7/docs/api/javax/swing/JTree.html#getToolTipText(java.awt.event.MouseEvent)
 		// https://stackoverflow.com/questions/517704/right-click-context-menu-for-java-jtree
-		
+		// https://docs.oracle.com/javase/tutorial/uiswing/components/tree.html
 		
 		MouseAdapter ma  = new MouseAdapter() {			
 			@Override
@@ -191,7 +204,7 @@ public class MainWindow {
 					jTree.setSelectionRow(row);
 					String[] nodeInfo = node.getUserObject().toString().split("\\|");
 					try {
-						mntmNewMenuItem.setText("ID: "+nodeInfo[1]);
+						mntmIDMenuItem.setText("ID: "+nodeInfo[1]);
 						//JMenuItem nMI = new JMenuItem("ID:"+nodeInfo[1]);
 						//popupMenu.add(nMI);
 						popupMenu.show(e.getComponent(), e.getX(), e.getY());
@@ -201,7 +214,7 @@ public class MainWindow {
 						e2.printStackTrace();
 					}
 					
-					System.out.println(nodeInfo);
+					System.out.println(nodeInfo.toString());
 					
 				}
 			}
@@ -270,31 +283,13 @@ public class MainWindow {
 		btnReadButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
-				File f;
-				FileWriter fW;
-				String[] configFiles = {"controller.token","ztcentral.token","controller.api"};
-				String[] configVals = {textFieldControlerToken.getText(),textFieldZTCToken.getText(),textFieldReptURL.getText()};
-				try {
-					
-					for(int i=0; i< configFiles.length; i++) {
-						
-						f = new File(configFiles[i]);
-						f.createNewFile();
-						
-						fW = new FileWriter(configFiles[i]);
-						fW.write(configVals[i]);
-						fW.close();
-					}
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}				
 				
-				jztBr.allTokens = new jZTTokens();
-				jztBr.allTokens.localToken = textFieldToken.getText();
-				jztBr.allTokens.controllerToken = textFieldControlerToken.getText();
-				jztBr.allTokens.ztCentralToken = textFieldZTCToken.getText();
-				jztBr.allTokens.controllerApi = textFieldReptURL.getText();
+								
+				//jztBr.allTokens.localToken = textFieldToken.getText();
+				//jztBr.allTokens.controllerToken = textFieldControlerToken.getText();
+				//jztBr.allTokens.ztCentralToken = textFieldZTCToken.getText();
+				//jztBr.allTokens.controllerApi = textFieldReptURL.getText();
+				
 				jztBr.outJTree = jTree;
 				jztBr.readZTData();
 

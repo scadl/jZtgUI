@@ -9,11 +9,14 @@ import java.io.Serializable;
  * 
  */
 public class jZTToken implements Serializable {
-	private static final long UID = 1L;
-	String netID;
-	tokenTypeEnum tokenType;
-	String tokenVal;
-	String apiURL;
+	
+	private static final long UID = 1L;	
+	private String dataFileName = "settings.ser";
+	
+	public String netID;
+	public tokenTypeEnum tokenType;
+	public String tokenVal;
+	public String apiURL;
 	
 	public Boolean loadValues()
 	{

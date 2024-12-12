@@ -5,11 +5,14 @@ package jZTgUI;
 
 import java.awt.Component;
 import java.io.BufferedReader;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -35,6 +38,7 @@ import org.json.simple.parser.ParseException;
 
 public class jZTBridge {
 
+	String dataFileName = "settings.ser";
 	public jZTToken[] allTokens;
 	public JTree outJTree = null;
 
@@ -58,7 +62,7 @@ public class jZTBridge {
 				req = "curl -X GET -H \"Authorization: token " + currentToken.tokenVal + "\" -L " + reqAPI;
 				break;
 			}
-			System.out.println(req);
+			System.out.println(">>> RQ: " + req);
 
 			// https://www.baeldung.com/java-curl
 			// https://stackoverflow.com/questions/2586975/how-to-use-curl-in-java
@@ -70,7 +74,7 @@ public class jZTBridge {
 			while ((line = br.readLine()) != null) {
 				resp += line;
 			}
-			System.out.println(resp);
+			System.out.println(">>> RESP: " + resp);
 			return resp;
 
 		} catch (Exception ep) {
@@ -129,7 +133,7 @@ public class jZTBridge {
 		JSONArray jPeers = new JSONArray();
 
 		if (!currentToken.tokenType.equals(tokenTypeEnum.ztcentralToken)) {
-			
+
 			req = apiURL + "peer";
 
 			String respJNodeProps = ztAPICurl(req, currentToken);
@@ -168,7 +172,7 @@ public class jZTBridge {
 					if (respMembers.length() > 2) {
 
 						activeNode = checkNodeActive(jPeers, peerID);
-						
+
 						authrized = (Boolean) jNodeAsMemb.get("authorized");
 
 						JSONArray jNIPs = (JSONArray) jNodeAsMemb.get("ipAssignments");
@@ -206,7 +210,7 @@ public class jZTBridge {
 			case controlerToken:
 
 				jArNetObj = (JSONObject) new JSONParser().parse(respNetList);
-				
+
 				req = apiURL + "controller/network_members&netID=" + nodeID;
 				String respMembers = ztAPICurl(req, currentToken);
 				JSONArray jNodeAsMemb = (JSONArray) new JSONParser().parse(respMembers);
@@ -217,28 +221,28 @@ public class jZTBridge {
 
 					Map.Entry<String, Integer> eNt = iTr1.next();
 					String peerID = eNt.getKey();
-					//System.out.println(peerID);				
+					// System.out.println(peerID);
 
 					String crIP = "NA.NA.NA.NA";
 					Boolean activeNode = checkNodeActive(jPeers, peerID);
 					Boolean authorized = false;
 					String authSt = "";
 					String nameNode = "";
-					
+
 					if (jNodeAsMemb.size() > 0) {
-						for(int j=0; j<jNodeAsMemb.size(); j++) {
+						for (int j = 0; j < jNodeAsMemb.size(); j++) {
 							JSONObject jPeerObj = (JSONObject) jNodeAsMemb.get(j);
-							if(jPeerObj.get("address").toString().startsWith(peerID)) {
+							if (jPeerObj.get("address").toString().startsWith(peerID)) {
 								authorized = (Boolean) jPeerObj.get("authorized");
 								JSONArray ipAddr = (JSONArray) jPeerObj.get("ipAssignments");
-								if(ipAddr.size()>0) {
+								if (ipAddr.size() > 0) {
 									crIP = (String) ipAddr.get(0);
 								}
 								nameNode = (String) jPeerObj.get("name");
 							}
 						}
 					}
-					
+
 					if (ContrID.startsWith(peerID)) {
 						authSt = "[C]";
 					} else if (authorized) {
@@ -253,7 +257,7 @@ public class jZTBridge {
 						authSt = "[E]";
 					}
 					DefaultMutableTreeNode nodeMember = new DefaultMutableTreeNode(
-							crIP + " (" + nameNode + ") |"  + peerID + "|" + authSt);
+							crIP + " (" + nameNode + ") |" + peerID + "|" + authSt);
 					nodeNetwork.add(nodeMember);
 
 				}
@@ -283,12 +287,12 @@ public class jZTBridge {
 					} else {
 						authSt = "[E]";
 					}
-					DefaultMutableTreeNode nodeMember = new DefaultMutableTreeNode(jZTCIps.get(0) +  
-							" (" + jZTCNode.get("name") + ") |" + jZTCNode.get("nodeId") + "|" + authSt);
+					DefaultMutableTreeNode nodeMember = new DefaultMutableTreeNode(jZTCIps.get(0) + " ("
+							+ jZTCNode.get("name") + ") |" + jZTCNode.get("nodeId") + "|" + authSt);
 					nodeNetwork.add(nodeMember);
 
-					//System.out.println("Node " + jZTCNode.get("nodeId") + " time: "
-					//		+ ((System.currentTimeMillis() - (long) jZTCNode.get("lastSeen")) / 60000));
+					// System.out.println("Node " + jZTCNode.get("nodeId") + " time: "
+					// + ((System.currentTimeMillis() - (long) jZTCNode.get("lastSeen")) / 60000));
 				}
 				break;
 			}
@@ -299,7 +303,48 @@ public class jZTBridge {
 		}
 	}
 
-	public void readZTData() {
+	private void loadTokens() {
+		try {
+			FileInputStream fis = new FileInputStream(dataFileName);
+			ObjectInputStream ois = new ObjectInputStream(fis);
+			allTokens = (jZTToken[]) ois.readObject();
+			ois.close();
+		} catch (FileNotFoundException e2) {
+			// TODO: handle exception
+			File f;
+			f = new File(dataFileName);
+			try {
+				f.createNewFile();
+			} catch (IOException e21) {
+				// TODO Auto-generated catch block
+				e21.printStackTrace();
+			}
+			loadTokens();
+		} catch (Exception e3) {
+			// TODO: handle exception
+			e3.printStackTrace();
+		}
+
+	}
+
+	private void saveTokens() {
+		try {
+			FileOutputStream fws = new FileOutputStream(dataFileName);
+			ObjectOutputStream outFSt = new ObjectOutputStream(fws);
+			outFSt.writeObject(allTokens);
+			outFSt.flush();
+			outFSt.close();
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+	
+	
+
+	public void readZTData(JTree inJTree, tokenTypeEnum tkType) {
+		
+		outJTree = inJTree;
 
 		try {
 
@@ -308,36 +353,33 @@ public class jZTBridge {
 			JSONArray jAr;
 			String req, netIP = null, Local_ID, Contr_ID;
 			String localApiURL = "http://localhost:9993/";
-			String dataFileName = "settings.ser";
-			jZTToken currentToken = new jZTToken();
 
-			FileInputStream fis = new FileInputStream(dataFileName);
-			ObjectInputStream ois = new ObjectInputStream(fis);
-			allTokens = (jZTToken[]) ois.readObject();
-			ois.close();
+			jZTToken currentToken = new jZTToken();
+			loadTokens();
+			if(allTokens == null) {
+				
+			}
 
 			// https://www.geeksforgeeks.org/parse-json-java/
 
 			// https://docs.zerotier.com/api/service/ref-v1/#tag/Node-Status/operation/node_status_readStatus
-			req = localApiURL + "status"; // Local Node Status. 
+			req = localApiURL + "status"; // Local Node Status.
 			currentToken.tokenType = tokenTypeEnum.localToken;
 			String statusResp = ztAPICurl(req, currentToken);
 			jo = (JSONObject) new JSONParser().parse(ztAPICurl(req, currentToken));
-						
+
 			if (statusResp.length() > 2) {
-				
+
 				// https://www.codejava.net/java-se/swing/jtree-basic-tutorial-and-examples
 				// https://stackoverflow.com/questions/7928839/adding-and-removing-nodes-from-a-jtree
 				Local_ID = (String) jo.get("address");
 				DefaultMutableTreeNode nr = new DefaultMutableTreeNode("You_ID: " + Local_ID);
 				System.out.println("You_ID: " + Local_ID);
 				System.out.println("Is online " + jo.get("online"));
-				
-				
+
 				JSONObject joR = (JSONObject) new JSONParser().parse(statusResp);
 				Contr_ID = (String) joR.get("address"); // This node ID.
 				System.out.println("Controller ID: " + Contr_ID);
-				
 
 				// https://docs.zerotier.com/api/service/ref-v1/#tag/Joined-Networks
 				req = localApiURL + "network"; // All the networks that this node is joined to
@@ -356,7 +398,8 @@ public class jZTBridge {
 						marker = "[NAN]";
 						jo.replace("name", netIP);
 					}
-					DefaultMutableTreeNode nodeNetwork = new DefaultMutableTreeNode(jo.get("name") + "|"+jo.get("id")+"|"+marker);
+					DefaultMutableTreeNode nodeNetwork = new DefaultMutableTreeNode(
+							jo.get("name") + "|" + jo.get("id") + "|" + marker);
 					System.out.println("This NET IP: " + netIP);
 
 					// https://docs.zerotier.com/controller
@@ -365,13 +408,13 @@ public class jZTBridge {
 					// ztAPICurl(req, false);
 
 					String respNets;
-					
-					for(jZTToken savedNet : allTokens ) {
+
+					for (jZTToken savedNet : allTokens) {
 						if (savedNet.netID == netIP) {
 							currentToken = savedNet;
 						}
 					}
-					
+
 					switch (currentToken.tokenType) {
 					case localToken:
 						// Try LOCAL Controller
@@ -384,12 +427,12 @@ public class jZTBridge {
 						break;
 					case controlerToken:
 						// Try Remote Controller
-						String jZTRepeaterURL = currentToken.apiURL + "?token=" + currentToken.tokenVal+"&apiRq=";
+						String jZTRepeaterURL = currentToken.apiURL + "?token=" + currentToken.tokenVal + "&apiRq=";
 						req = jZTRepeaterURL + "controller/network/" + jo.get("id") + "/member";
 						respNets = ztAPICurl(req, currentToken);
 						if (respNets.length() > 0) {
-							getNodesByID((String) jo.get("id"), jZTRepeaterURL, nodeNetwork, Contr_ID, Local_ID, respNets,
-									currentToken);
+							getNodesByID((String) jo.get("id"), jZTRepeaterURL, nodeNetwork, Contr_ID, Local_ID,
+									respNets, currentToken);
 						}
 						break;
 					case ztcentralToken:
@@ -426,25 +469,20 @@ public class jZTBridge {
 				DefaultMutableTreeNode rt = (DefaultMutableTreeNode) tm.getRoot();
 				tm.setRoot(nr);
 
-				ZTNodeCellRender ztcr = new ZTNodeCellRender();
-				outJTree.setCellRenderer(ztcr);
-				outJTree.setSelectionRow(0); // Required to make RMB clicks to work
-				
-				//File f;
-				//FileWriter fW;
-				
-				//f = new File("settings.props");
-				//f.createNewFile();
-				
-				//fW = new FileWriter("settings.props");
-				//fW.write(configVals[i]);
-				
-				FileOutputStream fws = new FileOutputStream("settings.ser");				
-				ObjectOutputStream outFSt = new ObjectOutputStream(fws);
-				outFSt.writeObject(allTokens);
-				outFSt.flush();
-				outFSt.close();
-				//	fW.close();
+
+
+				// File f;
+				// FileWriter fW;
+
+				// f = new File("settings.props");
+				// f.createNewFile();
+
+				// fW = new FileWriter("settings.props");
+				// fW.write(configVals[i]);
+
+				// fW.close();
+
+				saveTokens();
 
 				// tm.insertNodeInto(node1, rt, rt.getChildCount());
 			}

@@ -14,6 +14,10 @@ import java.util.Iterator;
 import java.util.zip.GZIPOutputStream;
 
 import javax.swing.JFrame;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
 import org.json.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -61,6 +65,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JMenuItem;
+import java.awt.Panel;
 
 public class MainWindow {
 
@@ -69,6 +74,8 @@ public class MainWindow {
 	private JTextField textFieldReptURL;
 	private JTextField textFieldControlerToken;
 	private JTextField textFieldZTCToken;
+	
+
 
 	/**
 	 * Launch the application.
@@ -125,32 +132,47 @@ public class MainWindow {
 		mainFrameWindow.setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
 		mainFrameWindow.setBounds(100, 100, 351, 450);
 		mainFrameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		mainFrameWindow.getContentPane().setLayout(new FormLayout(
-				new ColumnSpec[] { FormSpecs.LABEL_COMPONENT_GAP_COLSPEC, FormSpecs.RELATED_GAP_COLSPEC,
-						FormSpecs.GROWING_BUTTON_COLSPEC, FormSpecs.RELATED_GAP_COLSPEC,
-						FormSpecs.LABEL_COMPONENT_GAP_COLSPEC, },
-				new RowSpec[] { FormSpecs.RELATED_GAP_ROWSPEC, RowSpec.decode("14px"), FormSpecs.RELATED_GAP_ROWSPEC,
-						RowSpec.decode("301px:grow"), FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
-						FormSpecs.LABEL_COMPONENT_GAP_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
-						FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC,
-						FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
-						FormSpecs.LINE_GAP_ROWSPEC, }));
-
+		mainFrameWindow.getContentPane().setLayout(new FormLayout(new ColumnSpec[] {
+				FormSpecs.LABEL_COMPONENT_GAP_COLSPEC,
+				FormSpecs.RELATED_GAP_COLSPEC,
+				FormSpecs.GROWING_BUTTON_COLSPEC,
+				FormSpecs.RELATED_GAP_COLSPEC,
+				FormSpecs.LABEL_COMPONENT_GAP_COLSPEC,},
+			new RowSpec[] {
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				RowSpec.decode("301px:grow"),
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.LABEL_COMPONENT_GAP_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.LINE_GAP_ROWSPEC,}));
+		
+		Box horizontalBox = Box.createHorizontalBox();
+		mainFrameWindow.getContentPane().add(horizontalBox, "3, 2");
+		
 		JLabel lblLabelNetworks = new JLabel("ZT Netwoks");
-		mainFrameWindow.getContentPane().add(lblLabelNetworks, "3, 2");
-
+		horizontalBox.add(lblLabelNetworks);
+		
+		Panel panel_3 = new Panel();
+		horizontalBox.add(panel_3);
+		
 		JScrollPane scrollPane = new JScrollPane();
 		mainFrameWindow.getContentPane().add(scrollPane, "3, 4, fill, fill");
 
 		JTree jTree = new JTree();
 		jTree.setModel(new DefaultTreeModel(
-			new DefaultMutableTreeNode("-LocalPC-") {
+			new DefaultMutableTreeNode("-LocalPC-|N0N0N0N0N0|[L]") {
 				{
-					DefaultMutableTreeNode node_1;
-					node_1 = new DefaultMutableTreeNode("-Network_1-");
-						node_1.add(new DefaultMutableTreeNode("-Node_1[PC]-"));
-						node_1.add(new DefaultMutableTreeNode("-Node_2[PC]-"));
-					add(node_1);
+					
 				}
 			}
 		));
@@ -158,12 +180,41 @@ public class MainWindow {
 		jTree.setEditable(true);
 		ToolTipManager.sharedInstance().registerComponent(jTree);
 		
+		JButton btnNewButton = new JButton("LL");
+		btnNewButton.addActionListener(new ActionListener() {
+			Shell sh = new Shell();
+			public void actionPerformed(ActionEvent e) {
+				try {
+					// https://www.demo2s.com/java/eclipse-swt-messagebox-tutorial-with-examples.html
+					String lToken = jztBr.readTxtFile("C:\\ProgramData\\ZeroTier\\One\\authtoken.secret");
+					MessageBox mb = new MessageBox(sh, SWT.ICON_INFORMATION | SWT.OK);
+					mb.setText("Load OK");
+					mb.setMessage("Your local token:\n"+ lToken);
+					int retCode = mb.open();
+					if(retCode == SWT.OK) {
+						jztBr.readZTData(jTree, tokenTypeEnum.localToken);
+					}
+				} catch (Exception e2) {
+					// TODO: handle exception
+					MessageBox mb = new MessageBox(sh, SWT.ICON_WARNING | SWT.OK);
+					mb.setText("Load ERROR");
+					mb.setMessage("It looks, you don\\'t have ZT on this device.\n"+e2.toString());
+					e2.printStackTrace();
+					int retCode = mb.open();
+				} 
+			}
+		});
+		btnNewButton.setToolTipText("Try to load local token");
+		horizontalBox.add(btnNewButton);
+		
+		// https://www.demo2s.com/java/java-swing-jmenu-menu-component.html
 		JPopupMenu popupMenu = new JPopupMenu();
 		//addPopup(jTree, popupMenu);
 		popupMenu.setLabel("");
 		
 		JMenuItem mntmIDMenuItem = new JMenuItem("<NO ID>");
 		popupMenu.add(mntmIDMenuItem);
+		popupMenu.addSeparator();
 		
 		JMenu mntmTypeMenu = new JMenu("Set Type");
 		popupMenu.add(mntmTypeMenu);
@@ -186,6 +237,8 @@ public class MainWindow {
 			});
 		}
 		
+		
+
 		jTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		// https://docs.oracle.com/javase/tutorial/uiswing/components/tooltip.html
 		// https://docs.oracle.com/javase/7/docs/api/javax/swing/JTree.html#getToolTipText(java.awt.event.MouseEvent)
@@ -221,6 +274,10 @@ public class MainWindow {
 		};
 		jTree.addMouseListener(ma);
 		
+		ZTNodeCellRender ztcr = new ZTNodeCellRender();
+		jTree.setCellRenderer(ztcr);
+		jTree.setSelectionRow(0); // Required to make RMB clicks to work
+		
 
 		Box horizontalBox1 = Box.createHorizontalBox();
 		mainFrameWindow.getContentPane().add(horizontalBox1, "3, 6");
@@ -234,7 +291,7 @@ public class MainWindow {
 		textFieldToken = new JTextField();
 		horizontalBox1.add(textFieldToken);
 		textFieldToken.setColumns(10);
-		textFieldToken.setText(jztBr.readTxtFile("C:\\ProgramData\\ZeroTier\\One\\authtoken.secret"));
+		textFieldToken.setText("");
 
 		Box horizontalBox2 = Box.createHorizontalBox();
 		mainFrameWindow.getContentPane().add(horizontalBox2, "3, 9");
@@ -246,8 +303,6 @@ public class MainWindow {
 		horizontalBox2.add(panel_1);
 
 		textFieldReptURL = new JTextField();
-		textFieldReptURL.setText(jztBr.readTxtFile("controller.api"));
-		textFieldReptURL.setColumns(10);
 		horizontalBox2.add(textFieldReptURL);
 
 		Box horizontalBox3 = Box.createHorizontalBox();
@@ -260,8 +315,6 @@ public class MainWindow {
 		horizontalBox3.add(panel_2);
 
 		textFieldControlerToken = new JTextField();
-		textFieldControlerToken.setColumns(10);
-		textFieldControlerToken.setText(jztBr.readTxtFile("controller.token"));
 		horizontalBox3.add(textFieldControlerToken);
 
 		Box horizontalBox3_1 = Box.createHorizontalBox();
@@ -274,8 +327,6 @@ public class MainWindow {
 		horizontalBox3_1.add(panel_2_1);
 
 		textFieldZTCToken = new JTextField();
-		textFieldZTCToken.setColumns(10);
-		textFieldZTCToken.setText(jztBr.readTxtFile("ztcentral.token"));
 		horizontalBox3_1.add(textFieldZTCToken);
 
 		JButton btnReadButton = new JButton("Read");
@@ -284,21 +335,13 @@ public class MainWindow {
 			public void actionPerformed(ActionEvent e) {
 				
 				
-								
-				//jztBr.allTokens.localToken = textFieldToken.getText();
-				//jztBr.allTokens.controllerToken = textFieldControlerToken.getText();
-				//jztBr.allTokens.ztCentralToken = textFieldZTCToken.getText();
-				//jztBr.allTokens.controllerApi = textFieldReptURL.getText();
 				
-				jztBr.outJTree = jTree;
-				jztBr.readZTData();
-
 			}
 		});
 		btnReadButton.doClick();
 
 	}
-
+	
 	private static void addPopup(Component component, final JPopupMenu popup) {
 		component.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {

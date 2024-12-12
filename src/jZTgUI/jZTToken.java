@@ -18,6 +18,14 @@ public class jZTToken implements Serializable {
 	public String tokenVal;
 	public String apiURL;
 	
+	public jZTToken(String netID, tokenTypeEnum tokenType, String tokenVal, String apiURL) {
+		super();
+		this.netID = netID;
+		this.tokenType = tokenType;
+		this.tokenVal = tokenVal;
+		this.apiURL = apiURL;
+	}
+
 	public Boolean loadValues()
 	{
 		try{

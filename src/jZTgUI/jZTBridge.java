@@ -340,6 +340,51 @@ public class jZTBridge {
 		}
 	}
 	
+	public String readLocalInfo(
+			DefaultMutableTreeNode rootNode, 
+			DefaultTreeModel treeModel, 
+			String localToken) {
+		
+		String localApiURL = "http://localhost:9993/";
+		String netIP;
+		try {
+		
+		// https://www.geeksforgeeks.org/parse-json-java/
+					// https://docs.zerotier.com/api/service/ref-v1/#tag/Node-Status/operation/node_status_readStatus
+					String req = localApiURL + "status"; // Local Node Status.
+					jZTToken currentToken = new jZTToken("",tokenTypeEnum.localToken, localToken, "");
+					String statusResp = ztAPICurl(req, currentToken);					
+					JSONObject jo = (JSONObject) new JSONParser().parse(statusResp);
+
+					if (statusResp.length() > 2) {
+						// https://docs.zerotier.com/api/service/ref-v1/#tag/Joined-Networks
+						req = localApiURL + "network"; // All the networks that this node is joined to
+						JSONArray jAr = (JSONArray) new JSONParser().parse(ztAPICurl(req, currentToken));
+
+						for (int i = 0; i < jAr.size(); i++) {
+							jo = (JSONObject) jAr.get(i);
+							JSONArray jArrAd = (JSONArray) jo.get("assignedAddresses");
+							String marker = "";
+							try {
+								netIP = (String) jArrAd.get(0);
+								marker = "[NN]";
+							} catch (Exception exception) {
+								netIP = "<No IP Assigned>";
+								marker = "[NAN]";
+								jo.replace("name", netIP);
+							}
+							DefaultMutableTreeNode nodeNetwork = new DefaultMutableTreeNode(
+									jo.get("name") + "|" + jo.get("id") + "|" + marker);
+							treeModel.insertNodeInto(nodeNetwork, rootNode, rootNode.getChildCount());
+							System.out.println("This NET IP: " + netIP);
+						}
+					}
+		}catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		return "";
+	}
 	
 
 	public void readZTData(JTree inJTree, tokenTypeEnum tkType) {
@@ -354,7 +399,7 @@ public class jZTBridge {
 			String req, netIP = null, Local_ID, Contr_ID;
 			String localApiURL = "http://localhost:9993/";
 
-			jZTToken currentToken = new jZTToken();
+			jZTToken currentToken = new jZTToken("",tokenTypeEnum.localToken, "","");
 			loadTokens();
 			if(allTokens == null) {
 				

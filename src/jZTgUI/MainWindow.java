@@ -192,7 +192,8 @@ public class MainWindow {
 					mb.setMessage("Your local token:\n"+ lToken);
 					int retCode = mb.open();
 					if(retCode == SWT.OK) {
-						jztBr.readZTData(jTree, tokenTypeEnum.localToken);
+						DefaultMutableTreeNode dmr = (DefaultMutableTreeNode) jTree.getModel().getRoot();
+						jztBr.readLocalInfo(dmr, (DefaultTreeModel) jTree.getModel(), lToken);
 					}
 				} catch (Exception e2) {
 					// TODO: handle exception

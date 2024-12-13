@@ -70,12 +70,6 @@ import java.awt.Panel;
 public class MainWindow {
 
 	private JFrame mainFrameWindow;
-	private JTextField textFieldToken;
-	private JTextField textFieldReptURL;
-	private JTextField textFieldControlerToken;
-	private JTextField textFieldZTCToken;
-	
-
 
 	/**
 	 * Launch the application.
@@ -132,124 +126,115 @@ public class MainWindow {
 		mainFrameWindow.setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
 		mainFrameWindow.setBounds(100, 100, 351, 450);
 		mainFrameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		mainFrameWindow.getContentPane().setLayout(new FormLayout(new ColumnSpec[] {
-				FormSpecs.LABEL_COMPONENT_GAP_COLSPEC,
-				FormSpecs.RELATED_GAP_COLSPEC,
-				FormSpecs.GROWING_BUTTON_COLSPEC,
-				FormSpecs.RELATED_GAP_COLSPEC,
-				FormSpecs.LABEL_COMPONENT_GAP_COLSPEC,},
-			new RowSpec[] {
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("301px:grow"),
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.LABEL_COMPONENT_GAP_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.LINE_GAP_ROWSPEC,}));
-		
+		mainFrameWindow.getContentPane()
+				.setLayout(new FormLayout(
+						new ColumnSpec[] { FormSpecs.LABEL_COMPONENT_GAP_COLSPEC, FormSpecs.RELATED_GAP_COLSPEC,
+								FormSpecs.GROWING_BUTTON_COLSPEC, FormSpecs.RELATED_GAP_COLSPEC,
+								FormSpecs.LABEL_COMPONENT_GAP_COLSPEC, },
+						new RowSpec[] { FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
+								FormSpecs.RELATED_GAP_ROWSPEC, RowSpec.decode("301px:grow"),
+								FormSpecs.LABEL_COMPONENT_GAP_ROWSPEC, FormSpecs.LINE_GAP_ROWSPEC, }));
+
 		Box horizontalBox = Box.createHorizontalBox();
 		mainFrameWindow.getContentPane().add(horizontalBox, "3, 2");
-		
+
 		JLabel lblLabelNetworks = new JLabel("ZT Netwoks");
 		horizontalBox.add(lblLabelNetworks);
-		
+
 		Panel panel_3 = new Panel();
 		horizontalBox.add(panel_3);
-		
+
 		JScrollPane scrollPane = new JScrollPane();
 		mainFrameWindow.getContentPane().add(scrollPane, "3, 4, fill, fill");
 
 		JTree jTree = new JTree();
-		jTree.setModel(new DefaultTreeModel(
-			new DefaultMutableTreeNode("-LocalPC-|N0N0N0N0N0|[L]") {
-				{
-					
-				}
+		jTree.setModel(new DefaultTreeModel(new DefaultMutableTreeNode("-LocalPC-|N0N0N0N0N0|[L]") {
+			{
+
 			}
-		));
+		}));
 		scrollPane.setViewportView(jTree);
 		jTree.setEditable(true);
 		ToolTipManager.sharedInstance().registerComponent(jTree);
-		
+
 		JButton btnNewButton = new JButton("LL");
 		btnNewButton.addActionListener(new ActionListener() {
-			Shell sh = new Shell();
+
 			public void actionPerformed(ActionEvent e) {
 				try {
 					// https://www.demo2s.com/java/eclipse-swt-messagebox-tutorial-with-examples.html
 					String lToken = jztBr.readTxtFile("C:\\ProgramData\\ZeroTier\\One\\authtoken.secret");
-					MessageBox mb = new MessageBox(sh, SWT.ICON_INFORMATION | SWT.OK);
+					MessageBox mb = new MessageBox(new Shell(), SWT.ICON_INFORMATION | SWT.OK);
 					mb.setText("Load OK");
-					mb.setMessage("Your local token:\n"+ lToken);
+					mb.setMessage("Your local token:\n" + lToken);
 					int retCode = mb.open();
-					if(retCode == SWT.OK) {
-						DefaultMutableTreeNode dmr = (DefaultMutableTreeNode) jTree.getModel().getRoot();
-						jztBr.readLocalInfo(dmr, (DefaultTreeModel) jTree.getModel(), lToken);
+					if (retCode == SWT.OK) {
+						jztBr.readLocalInfo(jTree, lToken);
 					}
 				} catch (Exception e2) {
 					// TODO: handle exception
-					MessageBox mb = new MessageBox(sh, SWT.ICON_WARNING | SWT.OK);
+					MessageBox mb = new MessageBox(new Shell(), SWT.ICON_WARNING | SWT.OK);
 					mb.setText("Load ERROR");
-					mb.setMessage("It looks, you don\\'t have ZT on this device.\n"+e2.toString());
+					mb.setMessage("It looks, you do not have ZT on this device.\n" + e2.toString());
 					e2.printStackTrace();
 					int retCode = mb.open();
-				} 
+				}
 			}
 		});
 		btnNewButton.setToolTipText("Try to load local token");
 		horizontalBox.add(btnNewButton);
-		
+
+		JButton btnReadButton = new JButton("+");
+		horizontalBox.add(btnReadButton);
+		btnReadButton.setToolTipText("Add network manualy");
+		btnReadButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				DefaultTreeModel tm = (DefaultTreeModel) jTree.getModel();
+				DefaultMutableTreeNode tmr = (DefaultMutableTreeNode) tm.getRoot();
+				tm.insertNodeInto(new DefaultMutableTreeNode("New Network|N0N0N0N0N0|[NN]"), tmr, tmr.getChildCount());
+				tm.reload();
+
+			}
+		});
+
 		// https://www.demo2s.com/java/java-swing-jmenu-menu-component.html
 		JPopupMenu popupMenu = new JPopupMenu();
-		//addPopup(jTree, popupMenu);
+		// addPopup(jTree, popupMenu);
 		popupMenu.setLabel("");
-		
+
 		JMenuItem mntmIDMenuItem = new JMenuItem("<NO ID>");
 		popupMenu.add(mntmIDMenuItem);
 		popupMenu.addSeparator();
-		
+
 		JMenu mntmTypeMenu = new JMenu("Set Type");
 		popupMenu.add(mntmTypeMenu);
-		
-		JRadioButtonMenuItem[] mntmTypeItems = {
-				new JRadioButtonMenuItem("Controller"),
-				new JRadioButtonMenuItem("ZT Central"),
-				new JRadioButtonMenuItem("Local")
-		};
-		for(int i=0; i<mntmTypeItems.length; i++) {
+
+		JRadioButtonMenuItem[] mntmTypeItems = { new JRadioButtonMenuItem("Controller"),
+				new JRadioButtonMenuItem("ZT Central"), new JRadioButtonMenuItem("Local") };
+		for (int i = 0; i < mntmTypeItems.length; i++) {
 			mntmTypeMenu.add(mntmTypeItems[i]);
 			mntmTypeItems[i].addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					JRadioButtonMenuItem jrm = (JRadioButtonMenuItem) e.getSource();
-					for(int j=0; j<mntmTypeItems.length; j++) {
+					for (int j = 0; j < mntmTypeItems.length; j++) {
 						mntmTypeItems[j].setSelected(false);
 					}
 					jrm.setSelected(true);
 				}
 			});
 		}
-		
-		
 
 		jTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		// https://docs.oracle.com/javase/tutorial/uiswing/components/tooltip.html
 		// https://docs.oracle.com/javase/7/docs/api/javax/swing/JTree.html#getToolTipText(java.awt.event.MouseEvent)
 		// https://stackoverflow.com/questions/517704/right-click-context-menu-for-java-jtree
 		// https://docs.oracle.com/javase/tutorial/uiswing/components/tree.html
-		
-		MouseAdapter ma  = new MouseAdapter() {			
+
+		MouseAdapter ma = new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if(SwingUtilities.isRightMouseButton(e)) {
+				if (SwingUtilities.isRightMouseButton(e)) {
 					DefaultMutableTreeNode node = (DefaultMutableTreeNode) jTree.getLastSelectedPathComponent();
 					if (node == null) {
 						return;
@@ -258,91 +243,29 @@ public class MainWindow {
 					jTree.setSelectionRow(row);
 					String[] nodeInfo = node.getUserObject().toString().split("\\|");
 					try {
-						mntmIDMenuItem.setText("ID: "+nodeInfo[1]);
-						//JMenuItem nMI = new JMenuItem("ID:"+nodeInfo[1]);
-						//popupMenu.add(nMI);
+						mntmIDMenuItem.setText("ID: " + nodeInfo[1]);
+						// JMenuItem nMI = new JMenuItem("ID:"+nodeInfo[1]);
+						// popupMenu.add(nMI);
 						popupMenu.show(e.getComponent(), e.getX(), e.getY());
 					} catch (Exception e2) {
 						// TODO: handle exception
-						//mntmNewMenuItem.setText("<NO ID>");
+						// mntmNewMenuItem.setText("<NO ID>");
 						e2.printStackTrace();
 					}
-					
+
 					System.out.println(nodeInfo.toString());
-					
+
 				}
 			}
 		};
 		jTree.addMouseListener(ma);
-		
+
 		ZTNodeCellRender ztcr = new ZTNodeCellRender();
 		jTree.setCellRenderer(ztcr);
-		jTree.setSelectionRow(0); // Required to make RMB clicks to work
-		
-
-		Box horizontalBox1 = Box.createHorizontalBox();
-		mainFrameWindow.getContentPane().add(horizontalBox1, "3, 6");
-
-		JLabel lblLabelToken = new JLabel("You Token");
-		horizontalBox1.add(lblLabelToken);
-
-		JPanel panel = new JPanel();
-		horizontalBox1.add(panel);
-
-		textFieldToken = new JTextField();
-		horizontalBox1.add(textFieldToken);
-		textFieldToken.setColumns(10);
-		textFieldToken.setText("");
-
-		Box horizontalBox2 = Box.createHorizontalBox();
-		mainFrameWindow.getContentPane().add(horizontalBox2, "3, 9");
-
-		JLabel lblLabelRept = new JLabel("jZT Repeater");
-		horizontalBox2.add(lblLabelRept);
-
-		JPanel panel_1 = new JPanel();
-		horizontalBox2.add(panel_1);
-
-		textFieldReptURL = new JTextField();
-		horizontalBox2.add(textFieldReptURL);
-
-		Box horizontalBox3 = Box.createHorizontalBox();
-		mainFrameWindow.getContentPane().add(horizontalBox3, "3, 11");
-
-		JLabel lblControllerToken = new JLabel("Controller Token");
-		horizontalBox3.add(lblControllerToken);
-
-		JPanel panel_2 = new JPanel();
-		horizontalBox3.add(panel_2);
-
-		textFieldControlerToken = new JTextField();
-		horizontalBox3.add(textFieldControlerToken);
-
-		Box horizontalBox3_1 = Box.createHorizontalBox();
-		mainFrameWindow.getContentPane().add(horizontalBox3_1, "3, 13");
-
-		JLabel lblZtcentralToken = new JLabel("ZTCentral Token");
-		horizontalBox3_1.add(lblZtcentralToken);
-
-		JPanel panel_2_1 = new JPanel();
-		horizontalBox3_1.add(panel_2_1);
-
-		textFieldZTCToken = new JTextField();
-		horizontalBox3_1.add(textFieldZTCToken);
-
-		JButton btnReadButton = new JButton("Read");
-		mainFrameWindow.getContentPane().add(btnReadButton, "3, 15");
-		btnReadButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				
-				
-				
-			}
-		});
-		btnReadButton.doClick();
+		jTree.setSelectionRow(0);
 
 	}
-	
+
 	private static void addPopup(Component component, final JPopupMenu popup) {
 		component.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
@@ -350,11 +273,13 @@ public class MainWindow {
 					showMenu(e);
 				}
 			}
+
 			public void mouseReleased(MouseEvent e) {
 				if (e.isPopupTrigger()) {
 					showMenu(e);
 				}
 			}
+
 			private void showMenu(MouseEvent e) {
 				popup.show(e.getComponent(), e.getX(), e.getY());
 			}

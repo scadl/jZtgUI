@@ -340,10 +340,7 @@ public class jZTBridge {
 		}
 	}
 	
-	public String readLocalInfo(
-			DefaultMutableTreeNode rootNode, 
-			DefaultTreeModel treeModel, 
-			String localToken) {
+	public String readLocalInfo(JTree jTree, String localToken) {
 		
 		String localApiURL = "http://localhost:9993/";
 		String netIP;
@@ -375,7 +372,12 @@ public class jZTBridge {
 							}
 							DefaultMutableTreeNode nodeNetwork = new DefaultMutableTreeNode(
 									jo.get("name") + "|" + jo.get("id") + "|" + marker);
-							treeModel.insertNodeInto(nodeNetwork, rootNode, rootNode.getChildCount());
+							
+							DefaultTreeModel tmr = (DefaultTreeModel) jTree.getModel();
+							DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) tmr.getRoot();
+							tmr.insertNodeInto(nodeNetwork, rootNode, rootNode.getChildCount());
+							tmr.reload();
+							
 							System.out.println("This NET IP: " + netIP);
 						}
 					}

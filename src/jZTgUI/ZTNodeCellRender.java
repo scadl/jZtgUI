@@ -73,6 +73,8 @@ public class ZTNodeCellRender extends DefaultTreeCellRenderer {
 				setForeground(new Color(0,0,255));
 			} else if(nodeN.getUserObject().toString().endsWith("[NAN]")) {
 				setIcon(imIcnNetOff);
+			} else if (nodeN.getUserObject().toString().endsWith("[NN]")) {
+				setIcon(imIcnNet);
 			} else {
 				setIcon(imIcnG);
 			}

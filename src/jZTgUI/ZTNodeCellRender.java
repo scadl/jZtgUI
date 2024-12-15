@@ -52,7 +52,7 @@ public class ZTNodeCellRender extends DefaultTreeCellRenderer {
 		}
 		*/
 		DefaultMutableTreeNode nodeN = (DefaultMutableTreeNode) value;
-		if(tree.getModel().getRoot().equals(nodeN)) {
+		if (tree.getModel().getRoot().equals(nodeN)) {
 			setIcon(imIcnPC);
 		} else if (nodeN.getChildCount()>0) {
 			if(nodeN.getUserObject().toString().endsWith("[NAN]")) {
@@ -81,8 +81,8 @@ public class ZTNodeCellRender extends DefaultTreeCellRenderer {
 		}
 		
 		try {
-		setText(unfmtLbl[0]);
-		setToolTipText(unfmtLbl[1]);
+			setText(unfmtLbl[0]);
+			setToolTipText(unfmtLbl[1]);
 		} catch (Exception e) {
 			e.getStackTrace();
 		}

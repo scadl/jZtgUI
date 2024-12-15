@@ -38,7 +38,8 @@ import org.json.simple.parser.ParseException;
 
 public class jZTBridge {
 
-	String dataFileName = "settings.ser";
+	private String dataFileName = "settings.ser";
+	private String localApiURL = "http://localhost:9993/";
 	public jZTToken[] allTokens;
 	public JTree outJTree = null;
 
@@ -85,27 +86,7 @@ public class jZTBridge {
 
 	}
 
-	public String readTxtFile(String path) {
-		BufferedReader br = null;
-		String everything = "";
-		try {
-			br = new BufferedReader(new FileReader(path));
-			StringBuilder sb = new StringBuilder();
-			String line = br.readLine();
 
-			while (line != null) {
-				sb.append(line);
-				// sb.append(System.lineSeparator());
-				line = br.readLine();
-			}
-			everything = sb.toString();
-			br.close();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return everything;
-	}
 
 	private Boolean checkNodeActive(JSONArray jNodePeers, String NodeID) {
 
@@ -339,101 +320,47 @@ public class jZTBridge {
 			e.printStackTrace();
 		}
 	}
-	
+
+	public String readRemoteInfo(jZTToken remToken) {
+
+		try {
+			String req = remToken.apiURL + "?token=" + remToken.tokenVal + "&apiRq=" + "status"; // Remote Node Status.
+			String statusResp = ztAPICurl(req, remToken);
+			JSONObject jo = (JSONObject) new JSONParser().parse(statusResp);
+
+			System.out.println("This Controller ID: " + jo.get("address"));
+
+			return (String) jo.get("address");
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			return "";
+		}
+
+	}
+
 	public String readLocalInfo(JTree jTree, String localToken) {
-		
-		String localApiURL = "http://localhost:9993/";
+
 		String netIP;
 		try {
-		
-		// https://www.geeksforgeeks.org/parse-json-java/
-					// https://docs.zerotier.com/api/service/ref-v1/#tag/Node-Status/operation/node_status_readStatus
-					String req = localApiURL + "status"; // Local Node Status.
-					jZTToken currentToken = new jZTToken("",tokenTypeEnum.localToken, localToken, "");
-					String statusResp = ztAPICurl(req, currentToken);					
-					JSONObject jo = (JSONObject) new JSONParser().parse(statusResp);
-
-					if (statusResp.length() > 2) {
-						// https://docs.zerotier.com/api/service/ref-v1/#tag/Joined-Networks
-						req = localApiURL + "network"; // All the networks that this node is joined to
-						JSONArray jAr = (JSONArray) new JSONParser().parse(ztAPICurl(req, currentToken));
-
-						for (int i = 0; i < jAr.size(); i++) {
-							jo = (JSONObject) jAr.get(i);
-							JSONArray jArrAd = (JSONArray) jo.get("assignedAddresses");
-							String marker = "";
-							try {
-								netIP = (String) jArrAd.get(0);
-								marker = "[NN]";
-							} catch (Exception exception) {
-								netIP = "<No IP Assigned>";
-								marker = "[NAN]";
-								jo.replace("name", netIP);
-							}
-							DefaultMutableTreeNode nodeNetwork = new DefaultMutableTreeNode(
-									jo.get("name") + "|" + jo.get("id") + "|" + marker);
-							
-							DefaultTreeModel tmr = (DefaultTreeModel) jTree.getModel();
-							DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) tmr.getRoot();
-							tmr.insertNodeInto(nodeNetwork, rootNode, rootNode.getChildCount());
-							tmr.reload();
-							
-							System.out.println("This NET IP: " + netIP);
-						}
-					}
-		}catch (Exception e) {
-			// TODO: handle exception
-		}
-		
-		return "";
-	}
-	
-
-	public void readZTData(JTree inJTree, tokenTypeEnum tkType) {
-		
-		outJTree = inJTree;
-
-		try {
-
-			Object obj;
-			JSONObject jo;
-			JSONArray jAr;
-			String req, netIP = null, Local_ID, Contr_ID;
-			String localApiURL = "http://localhost:9993/";
-
-			jZTToken currentToken = new jZTToken("",tokenTypeEnum.localToken, "","");
-			loadTokens();
-			if(allTokens == null) {
-				
-			}
 
 			// https://www.geeksforgeeks.org/parse-json-java/
-
 			// https://docs.zerotier.com/api/service/ref-v1/#tag/Node-Status/operation/node_status_readStatus
-			req = localApiURL + "status"; // Local Node Status.
-			currentToken.tokenType = tokenTypeEnum.localToken;
+			String req = localApiURL + "status"; // Local Node Status.
+			jZTToken currentToken = new jZTToken("", tokenTypeEnum.localToken, localToken, "");
 			String statusResp = ztAPICurl(req, currentToken);
-			jo = (JSONObject) new JSONParser().parse(ztAPICurl(req, currentToken));
+			JSONObject jo = (JSONObject) new JSONParser().parse(statusResp);
+			
+			String LocalID = (String) jo.get("address");
+
+			System.out.println("This PC ID: " + LocalID);
 
 			if (statusResp.length() > 2) {
-
-				// https://www.codejava.net/java-se/swing/jtree-basic-tutorial-and-examples
-				// https://stackoverflow.com/questions/7928839/adding-and-removing-nodes-from-a-jtree
-				Local_ID = (String) jo.get("address");
-				DefaultMutableTreeNode nr = new DefaultMutableTreeNode("You_ID: " + Local_ID);
-				System.out.println("You_ID: " + Local_ID);
-				System.out.println("Is online " + jo.get("online"));
-
-				JSONObject joR = (JSONObject) new JSONParser().parse(statusResp);
-				Contr_ID = (String) joR.get("address"); // This node ID.
-				System.out.println("Controller ID: " + Contr_ID);
-
 				// https://docs.zerotier.com/api/service/ref-v1/#tag/Joined-Networks
 				req = localApiURL + "network"; // All the networks that this node is joined to
-				jAr = (JSONArray) new JSONParser().parse(ztAPICurl(req, currentToken));
+				JSONArray jAr = (JSONArray) new JSONParser().parse(ztAPICurl(req, currentToken));
 
 				for (int i = 0; i < jAr.size(); i++) {
-
 					jo = (JSONObject) jAr.get(i);
 					JSONArray jArrAd = (JSONArray) jo.get("assignedAddresses");
 					String marker = "";
@@ -441,98 +368,106 @@ public class jZTBridge {
 						netIP = (String) jArrAd.get(0);
 						marker = "[NN]";
 					} catch (Exception exception) {
-						netIP = "<No IP Assigned>";
+						netIP = "<No Name and IP>";
 						marker = "[NAN]";
 						jo.replace("name", netIP);
 					}
 					DefaultMutableTreeNode nodeNetwork = new DefaultMutableTreeNode(
 							jo.get("name") + "|" + jo.get("id") + "|" + marker);
+
+					// Try to read network members from local controller
+					jZTToken currentTokenNN = new jZTToken(LocalID, tokenTypeEnum.localToken, localToken,"");
+					readZTData(nodeNetwork, currentTokenNN, LocalID, LocalID);
+
+					DefaultTreeModel tmr = (DefaultTreeModel) jTree.getModel();
+					DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) tmr.getRoot();
+					tmr.insertNodeInto(nodeNetwork, rootNode, rootNode.getChildCount());
+					tmr.reload();
+
 					System.out.println("This NET IP: " + netIP);
-
-					// https://docs.zerotier.com/controller
-
-					// req = jZTRepeaterURL+"controller/network";
-					// ztAPICurl(req, false);
-
-					String respNets;
-
-					for (jZTToken savedNet : allTokens) {
-						if (savedNet.netID == netIP) {
-							currentToken = savedNet;
-						}
-					}
-
-					switch (currentToken.tokenType) {
-					case localToken:
-						// Try LOCAL Controller
-						req = localApiURL + "controller/network/" + jo.get("id") + "/member";
-						respNets = ztAPICurl(req, currentToken);
-						if (respNets.length() > 0) {
-							getNodesByID((String) jo.get("id"), localApiURL, nodeNetwork, Contr_ID, Local_ID, respNets,
-									currentToken);
-						}
-						break;
-					case controlerToken:
-						// Try Remote Controller
-						String jZTRepeaterURL = currentToken.apiURL + "?token=" + currentToken.tokenVal + "&apiRq=";
-						req = jZTRepeaterURL + "controller/network/" + jo.get("id") + "/member";
-						respNets = ztAPICurl(req, currentToken);
-						if (respNets.length() > 0) {
-							getNodesByID((String) jo.get("id"), jZTRepeaterURL, nodeNetwork, Contr_ID, Local_ID,
-									respNets, currentToken);
-						}
-						break;
-					case ztcentralToken:
-						// Try ZTCentral Controller
-						// curl -X GET -H "Authorization: token xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" -L
-						// https://api.zerotier.com/api/v1/network/565799d8f616c30f/member
-						String ZTCentralAPI = "https://api.zerotier.com/api/v1/";
-						req = ZTCentralAPI + "network/" + jo.get("id") + "/member";
-						respNets = ztAPICurl(req, currentToken);
-						Boolean canParse = true;
-						try {
-							new JSONParser().parse(respNets);
-						} catch (ParseException eztc) {
-							// TODO: handle exception
-							// eztc.printStackTrace();
-							System.out.print("Malformed ZTCenral resonse got");
-							canParse = false;
-						}
-						if (respNets.length() > 2 && canParse) {
-							// getNodesByID((String) jo.get("id"), jZTRepeaterURL, nodeNetwork, Contr_ID,
-							// Local_ID, respNets);
-							getNodesByID("", "", nodeNetwork, Contr_ID, Local_ID, respNets, currentToken);
-
-						}
-						break;
-					}
-					// System.out.println(respNets.length());
-
-					nr.add(nodeNetwork);
-					// jo.get("id")
 				}
-
-				DefaultTreeModel tm = (DefaultTreeModel) outJTree.getModel();
-				DefaultMutableTreeNode rt = (DefaultMutableTreeNode) tm.getRoot();
-				tm.setRoot(nr);
-
-
-
-				// File f;
-				// FileWriter fW;
-
-				// f = new File("settings.props");
-				// f.createNewFile();
-
-				// fW = new FileWriter("settings.props");
-				// fW.write(configVals[i]);
-
-				// fW.close();
-
-				saveTokens();
-
-				// tm.insertNodeInto(node1, rt, rt.getChildCount());
 			}
+			return LocalID;
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			return "";
+		}
+
+	}
+
+	public void readZTData(DefaultMutableTreeNode rootNode, jZTToken currentToken, String Local_ID,
+			String Contr_ID) {
+
+		String req, respNets;
+		String ID = currentToken.netID;
+		try {
+
+			switch (currentToken.tokenType) {
+			case localToken:
+				// Try LOCAL Controller
+				req = localApiURL + "controller/network/" + ID + "/member";
+				respNets = ztAPICurl(req, currentToken);
+				if (respNets.length() > 0) {
+					getNodesByID((String) ID, localApiURL, rootNode, Contr_ID, Local_ID, respNets, currentToken);
+				}
+				break;
+			case controlerToken:
+				// Try Remote Controller
+				// https://scadsdnd.net/jZTRep/?token=xxxxxxxxxxxxxxxx&apiRq=status
+				String jZTRepeaterURL = currentToken.apiURL + "?token=" + currentToken.tokenVal + "&apiRq=";
+				req = jZTRepeaterURL + "controller/network/" + ID + "/member";
+				respNets = ztAPICurl(req, currentToken);
+				if (respNets.length() > 0) {
+					getNodesByID((String) ID, jZTRepeaterURL, rootNode, Contr_ID, Local_ID, respNets, currentToken);
+				}
+				break;
+			case ztcentralToken:
+				// Try ZTCentral Controller
+				// curl -X GET -H "Authorization: token xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" -L
+				// https://api.zerotier.com/api/v1/network/565799d8f616c30f/member
+				String ZTCentralAPI = "https://api.zerotier.com/api/v1/";
+				req = ZTCentralAPI + "network/" + ID + "/member";
+				respNets = ztAPICurl(req, currentToken);
+				Boolean canParse = true;
+				try {
+					new JSONParser().parse(respNets);
+				} catch (ParseException eztc) {
+					// TODO: handle exception
+					// eztc.printStackTrace();
+					System.out.print("Malformed ZTCenral resonse got");
+					canParse = false;
+				}
+				if (respNets.length() > 2 && canParse) {
+					// getNodesByID((String) jo.get("id"), jZTRepeaterURL, nodeNetwork, Contr_ID,
+					// Local_ID, respNets);
+					getNodesByID("", "", rootNode, Contr_ID, Local_ID, respNets, currentToken);
+
+				}
+				break;
+			}
+			// System.out.println(respNets.length());
+
+			// nr.add(nodeNetwork);
+			// jo.get("id")
+
+			//DefaultTreeModel tmr = (DefaultTreeModel) jTree.getModel();
+			//tmr.reload();
+
+			// File f;
+			// FileWriter fW;
+
+			// f = new File("settings.props");
+			// f.createNewFile();
+
+			// fW = new FileWriter("settings.props");
+			// fW.write(configVals[i]);
+
+			// fW.close();
+
+			saveTokens();
+
+			// tm.insertNodeInto(node1, rt, rt.getChildCount());
 
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
